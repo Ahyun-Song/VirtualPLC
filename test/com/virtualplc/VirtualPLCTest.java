@@ -77,4 +77,10 @@ public class VirtualPLCTest {
 				"건조 온도가 범위를 벗어났습니다: " + temp);
 		}
 	}
+	
+	@Test
+	public void testSendDataToServer() {
+		VirtualPLC plc = new VirtualPLC();
+		plc.sendDataToServer("127.0.0.1", 5000); // WPF 서버 IP와 포트
+	}
 }

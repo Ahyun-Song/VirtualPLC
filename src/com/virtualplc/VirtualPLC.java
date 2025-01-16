@@ -27,7 +27,7 @@ public class VirtualPLC {
 	public VirtualPLC() {
 		random = new Random();
 		slurrySupplyRate = 12; // 초기값 (12 mL/min)
-		slurryVolume = 100;	// 초기 슬러리 용량 (100L)
+		slurryVolume = 100; // 초기 슬러리 용량 (100L)
 		slurryTemperature = random.nextDouble() * 10 + 20; // 20~30°C 랜덤
 
 		coatingSpeed = random.nextDouble() * 0.7 + 0.8; // 0.8~1.5 m/min 랜덤
@@ -67,20 +67,39 @@ public class VirtualPLC {
 	}
 
 	// JSON 데이터 생성 메서드
-	public String generateJsonData() {
-		JsonObject jsonData = new JsonObject();
-		jsonData.addProperty("slurrySupplyRate", slurrySupplyRate);
-		jsonData.addProperty("slurryVolume", slurryVolume);
-		jsonData.addProperty("slurryTemperature", slurryTemperature);
-		jsonData.addProperty("coatingSpeed", coatingSpeed);
-		jsonData.addProperty("coatingThickness", coatingThickness);
-		jsonData.addProperty("dryingTemperature", dryingTemperature);
-		return jsonData.toString(); // JSON 문자열 반환
+	public String generateFormattedJsonData() {
+		JsonObject root = new JsonObject();
+
+		// 슬러리 탱크 데이터
+		JsonObject slurryTank = new JsonObject();
+		slurryTank.addProperty("Timestamp", java.time.Instant.now().toString());
+		slurryTank.addProperty("SupplySpeed", slurrySupplyRate);
+		slurryTank.addProperty("RemainingVolume", slurryVolume);
+		slurryTank.addProperty("Temperature", slurryTemperature);
+		root.add("SlurryTank", slurryTank);
+
+		// 코팅 공정 데이터
+		JsonObject coatingProcess = new JsonObject();
+		coatingProcess.addProperty("Timestamp", java.time.Instant.now().toString());
+		coatingProcess.addProperty("Speed", coatingSpeed);
+		coatingProcess.addProperty("Thickness", coatingThickness);
+		root.add("CoatingProcess", coatingProcess);
+
+		// 건조 공정 데이터
+		JsonObject dryingProcess = new JsonObject();
+		dryingProcess.addProperty("Timestamp", java.time.Instant.now().toString());
+		dryingProcess.addProperty("Temperature", dryingTemperature);
+		root.add("DryingProcess", dryingProcess);
+
+		return root.toString(); // JSON 문자열 반환
 	}
 
 	// TCP 클라이언트를 사용해 JSON 데이터 전송
 	public void sendDataToServer(String serverIp, int port) {
-		String jsonData = generateJsonData(); // JSON 데이터 생성
+		String jsonData = generateFormattedJsonData(); // 새로운 형식의 JSON 데이터 생성
+		System.out.println("Generated JSON Data:");
+		System.out.println(jsonData); // 콘솔에 JSON 데이터 출력
+
 		try (Socket socket = new Socket(serverIp, port)) {
 			System.out.println("Connected to server: " + serverIp + ":" + port);
 
@@ -88,55 +107,54 @@ public class VirtualPLC {
 			PrintWriter writer = new PrintWriter(output, true, StandardCharsets.UTF_8); // UTF-8로 전송
 			writer.println(jsonData); // JSON 데이터 전송
 
-			System.out.println("Sent JSON Data: " + jsonData);
+			System.out.println("Sent JSON Data to server.");
 		} catch (Exception ex) {
 			System.err.println("Failed to send data to server: " + ex.getMessage());
 		}
 	}
-	
-		/* 테스트 코드 Getter 메서드 */
-		// 슬러리 용량 반환 메서드
-		public double getSlurryVolume() {
-		  return slurryVolume;
-		}
-		
-		// 슬러리 공급 속도 반환 메서드
-		public double getSlurrySupplyRate() {
-		  return slurrySupplyRate;
-		}
 
-		// 슬러리 온도 반환 메서드
-		public double getSlurryTemperature() {
-		  return slurryTemperature;
-		}
+	/* 테스트 코드 Getter 메서드 */
+	// 슬러리 용량 반환 메서드
+	public double getSlurryVolume() {
+		return slurryVolume;
+	}
 
-		// 코팅 속도 반환 메서드
-		public double getCoatingSpeed() {
-		  return coatingSpeed;
-		}
+	// 슬러리 공급 속도 반환 메서드
+	public double getSlurrySupplyRate() {
+		return slurrySupplyRate;
+	}
 
-		// 코팅 두께 반환 메서드
-		public double getCoatingThickness() {
-		  return coatingThickness;
-		}
+	// 슬러리 온도 반환 메서드
+	public double getSlurryTemperature() {
+		return slurryTemperature;
+	}
 
-		// 건조 온도 반환 메서드
-		public double getDryingTemperature() {
-		  return dryingTemperature;
-		}
+	// 코팅 속도 반환 메서드
+	public double getCoatingSpeed() {
+		return coatingSpeed;
+	}
 
+	// 코팅 두께 반환 메서드
+	public double getCoatingThickness() {
+		return coatingThickness;
+	}
+
+	// 건조 온도 반환 메서드
+	public double getDryingTemperature() {
+		return dryingTemperature;
+	}
 
 	public static void main(String[] args) {
 		VirtualPLC plc = new VirtualPLC();
 
 		// 서버 IP와 포트 설정
 		String serverIp = "192.168.1.173"; // WPF 서버 IP
-		int serverPort = 8080;			// WPF 서버 포트
+		int serverPort = 8080; // WPF 서버 포트
 
 		// 상태 업데이트와 데이터 전송 반복 실행
 		while (true) {
-			plc.updateProcesses();		// 공정 상태 업데이트
-			plc.displayStatus();		 // 현재 상태 출력
+			plc.updateProcesses(); // 공정 상태 업데이트
+			plc.displayStatus(); // 현재 상태 출력
 			plc.sendDataToServer(serverIp, serverPort); // 서버로 JSON 데이터 전송
 
 			try {

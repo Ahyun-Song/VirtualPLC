@@ -69,10 +69,13 @@ public class VirtualPLC {
 	// JSON 데이터 생성 메서드
 	public String generateFormattedJsonData() {
 		JsonObject root = new JsonObject();
+		
+		// 현재 시간 가져오기 (현지 시간대 기준)
+		String timestamp = java.time.LocalDateTime.now().toString();
 
 		// 슬러리 탱크 데이터
 		JsonObject slurryTank = new JsonObject();
-		slurryTank.addProperty("Timestamp", java.time.Instant.now().toString());
+		slurryTank.addProperty("Timestamp", timestamp);
 		slurryTank.addProperty("SupplySpeed", slurrySupplyRate);
 		slurryTank.addProperty("RemainingVolume", slurryVolume);
 		slurryTank.addProperty("Temperature", slurryTemperature);
@@ -80,14 +83,14 @@ public class VirtualPLC {
 
 		// 코팅 공정 데이터
 		JsonObject coatingProcess = new JsonObject();
-		coatingProcess.addProperty("Timestamp", java.time.Instant.now().toString());
+		coatingProcess.addProperty("Timestamp", timestamp);
 		coatingProcess.addProperty("Speed", coatingSpeed);
 		coatingProcess.addProperty("Thickness", coatingThickness);
 		root.add("CoatingProcess", coatingProcess);
 
 		// 건조 공정 데이터
 		JsonObject dryingProcess = new JsonObject();
-		dryingProcess.addProperty("Timestamp", java.time.Instant.now().toString());
+		dryingProcess.addProperty("Timestamp", timestamp);
 		dryingProcess.addProperty("Temperature", dryingTemperature);
 		root.add("DryingProcess", dryingProcess);
 
@@ -148,7 +151,7 @@ public class VirtualPLC {
 		VirtualPLC plc = new VirtualPLC();
 
 		// 서버 IP와 포트 설정
-		String serverIp = "192.168.1.173"; // WPF 서버 IP
+		String serverIp = "118.127.238.194"; // WPF 서버 IP
 		int serverPort = 8080; // WPF 서버 포트
 
 		// 상태 업데이트와 데이터 전송 반복 실행

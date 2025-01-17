@@ -151,8 +151,9 @@ public class VirtualPLC {
 		VirtualPLC plc = new VirtualPLC();
 
 		// 서버 IP와 포트 설정
-		//String serverIp = "192.168.1.173"; //창헌
-		String serverIp = "192.168.1.196"; // WPF 서버 IP
+		String serverIp = "192.168.1.173"; //창헌
+		//String serverIp = "192.168.1.196"; // 유석
+		//String serverIp = "192.168.1.151"; // 아현
 		int serverPort = 8080; // WPF 서버 포트
 
 		// 상태 업데이트와 데이터 전송 반복 실행

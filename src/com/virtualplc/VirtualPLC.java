@@ -151,20 +151,35 @@ public class VirtualPLC {
 		VirtualPLC plc = new VirtualPLC();
 
 		// 서버 IP와 포트 설정
-		String serverIp = "118.127.238.194"; // WPF 서버 IP
+		//String serverIp = "192.168.1.173"; //창헌
+		String serverIp = "192.168.1.196"; // WPF 서버 IP
 		int serverPort = 8080; // WPF 서버 포트
 
 		// 상태 업데이트와 데이터 전송 반복 실행
 		while (true) {
+			long startTime = System.currentTimeMillis(); // 시작 시간 기록
+
 			plc.updateProcesses(); // 공정 상태 업데이트
 			plc.displayStatus(); // 현재 상태 출력
 			plc.sendDataToServer(serverIp, serverPort); // 서버로 JSON 데이터 전송
 
-			try {
-				Thread.sleep(1000); // 1초 대기
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			// 경과 시간 계산
+			long elapsedTime = System.currentTimeMillis() - startTime;
+
+			// 남은 시간 계산
+			long sleepTime = 1000 - elapsedTime;
+
+			if (sleepTime > 0) {
+				try {
+					Thread.sleep(sleepTime); // 남은 시간만큼 대기
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			} else {
+				// 처리 시간이 1초를 초과한 경우 경고 메시지 출력
+				System.out.println("Warning: Processing took longer than 1 second.");
 			}
 		}
+
 	}
 }

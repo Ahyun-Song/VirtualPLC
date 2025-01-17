@@ -81,6 +81,6 @@ public class VirtualPLCTest {
 	@Test
 	public void testSendDataToServer() {
 		VirtualPLC plc = new VirtualPLC();
-		plc.sendDataToServer("127.0.0.1", 5000); // WPF 서버 IP와 포트
+		plc.sendDataToServer("192.168.1.173", 8080); // WPF 서버 IP와 포트
 	}
 }

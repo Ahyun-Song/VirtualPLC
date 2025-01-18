@@ -153,7 +153,7 @@ public class VirtualPLC {
 		// 서버 IP와 포트 설정
 		String serverIp1 = "192.168.1.173"; //창헌
 		String serverIp2 = "192.168.1.196"; // 유석
-		//String serverIp3 = "192.168.1.151"; // 아현
+		String serverIp3 = "192.168.1.151"; // 아현
 		int serverPort = 8080; // WPF 서버 포트
 
 		// 상태 업데이트와 데이터 전송 반복 실행
@@ -164,7 +164,7 @@ public class VirtualPLC {
 			plc.displayStatus(); // 현재 상태 출력
 			plc.sendDataToServer(serverIp1, serverPort);// 서버로 JSON 데이터 전송
 			plc.sendDataToServer(serverIp2, serverPort);
-			//plc.sendDataToServer(serverIp3, serverPort);
+			plc.sendDataToServer(serverIp3, serverPort);
 
 			// 경과 시간 계산
 			long elapsedTime = System.currentTimeMillis() - startTime;

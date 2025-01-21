@@ -99,22 +99,35 @@ public class VirtualPLC {
 
 	// TCP 클라이언트를 사용해 JSON 데이터 전송
 	public void sendDataToServer(String serverIp, int port) {
-		String jsonData = generateFormattedJsonData(); // 새로운 형식의 JSON 데이터 생성
-		System.out.println("Generated JSON Data:");
-		System.out.println(jsonData); // 콘솔에 JSON 데이터 출력
+		while (true) {
+			try (Socket socket = new Socket(serverIp, port)) {
+				System.out.println("Connected to server: " + serverIp + ":" + port);
 
-		try (Socket socket = new Socket(serverIp, port)) {
-			System.out.println("Connected to server: " + serverIp + ":" + port);
+				OutputStream output = socket.getOutputStream();
+				PrintWriter writer = new PrintWriter(output, true, StandardCharsets.UTF_8);
 
-			OutputStream output = socket.getOutputStream();
-			PrintWriter writer = new PrintWriter(output, true, StandardCharsets.UTF_8); // UTF-8로 전송
-			writer.println(jsonData); // JSON 데이터 전송
+				while (true) { // 지속적으로 데이터 전송
+					String jsonData = generateFormattedJsonData();
+					System.out.println("Generated JSON Data:");
+					System.out.println(jsonData); // 콘솔에 JSON 데이터 출력
 
-			System.out.println("Sent JSON Data to server.");
-		} catch (Exception ex) {
-			System.err.println("Failed to send data to server: " + ex.getMessage());
+					writer.println(jsonData); // JSON 데이터 전송
+					System.out.println("Sent JSON Data to server.");
+
+					Thread.sleep(1000); // 1초 대기
+				}
+			} catch (Exception ex) {
+				System.err.println("Connection lost or failed: " + ex.getMessage());
+				System.out.println("Retrying connection in 5 seconds...");
+				try {
+					Thread.sleep(5000); // 5초 대기 후 재연결 시도
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
+
 
 	/* 테스트 코드 Getter 메서드 */
 	// 슬러리 용량 반환 메서드
@@ -151,8 +164,8 @@ public class VirtualPLC {
 		VirtualPLC plc = new VirtualPLC();
 
 		// 서버 IP와 포트 설정
-		String serverIp1 = "192.168.1.173"; //창헌
-		String serverIp2 = "192.168.1.196"; // 유석
+		//String serverIp1 = "192.168.1.173"; //창헌
+		//String serverIp2 = "192.168.1.196"; // 유석
 		String serverIp3 = "192.168.1.151"; // 아현
 		int serverPort = 8080; // WPF 서버 포트
 
@@ -162,8 +175,8 @@ public class VirtualPLC {
 
 			plc.updateProcesses(); // 공정 상태 업데이트
 			plc.displayStatus(); // 현재 상태 출력
-			plc.sendDataToServer(serverIp1, serverPort);// 서버로 JSON 데이터 전송
-			plc.sendDataToServer(serverIp2, serverPort);
+			//plc.sendDataToServer(serverIp1, serverPort);// 서버로 JSON 데이터 전송
+			//plc.sendDataToServer(serverIp2, serverPort);
 			plc.sendDataToServer(serverIp3, serverPort);
 
 			// 경과 시간 계산

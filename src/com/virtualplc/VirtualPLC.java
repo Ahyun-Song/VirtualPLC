@@ -69,7 +69,7 @@ public class VirtualPLC {
 	// JSON 데이터 생성 메서드
 	public String generateFormattedJsonData() {
 		JsonObject root = new JsonObject();
-		
+
 		// 현재 시간 가져오기 (현지 시간대 기준)
 		String timestamp = java.time.LocalDateTime.now().toString();
 
@@ -128,7 +128,6 @@ public class VirtualPLC {
 		}
 	}
 
-
 	/* 테스트 코드 Getter 메서드 */
 	// 슬러리 용량 반환 메서드
 	public double getSlurryVolume() {
@@ -164,27 +163,29 @@ public class VirtualPLC {
 		VirtualPLC plc = new VirtualPLC();
 
 		// 서버 IP와 포트 설정
-		// String serverIp1 = "192.168.1.173"; //창헌
-		// String serverIp2 = "192.168.1.196"; // 유석
-		String serverIp3 = "192.168.1.151"; // 아현
-		int serverPort = 8080; // WPF 서버 포트
+		String serverIp = "192.168.1.151"; // 동일한 IP
+		int dbPort = 8081; // DB 저장용 포트
+		int wpfPort = 8080; // WPF 서버 포트
 
 		// 데이터 전송 스레드 생성
-		Thread dataThread = new Thread(() -> {
-			//plc.sendDataToServer(serverIp1, serverPort);
-			//plc.sendDataToServer(serverIp2, serverPort);
-			plc.sendDataToServer(serverIp3, serverPort); // 서버로 JSON 데이터 전송
+		Thread dbThread = new Thread(() -> {
+			plc.sendDataToServer(serverIp, dbPort); // DB 저장용 서버로 JSON 데이터 전송
+		});
+
+		Thread wpfThread = new Thread(() -> {
+			plc.sendDataToServer(serverIp, wpfPort); // WPF 서버로 JSON 데이터 전송
 		});
 
 		// 데이터 전송 스레드 시작
-		dataThread.start();
+		dbThread.start();
+		wpfThread.start();
 
 		// 상태 업데이트와 데이터 출력 반복 실행
 		while (true) {
 			long startTime = System.currentTimeMillis(); // 시작 시간 기록
 
 			plc.updateProcesses(); // 공정 상태 업데이트
-			plc.displayStatus(); // 현재 상태 출력
+			plc.displayStatus(); // 상태 출력
 
 			// 경과 시간 계산
 			long elapsedTime = System.currentTimeMillis() - startTime;

@@ -94,8 +94,13 @@ public class VirtualPLC {
 		dryingProcess.addProperty("Temperature", dryingTemperature);
 		root.add("DryingProcess", dryingProcess);
 
-		return root.toString(); // JSON 문자열 반환
-	}
+		// 들여쓰기와 정렬된 JSON 문자열 생성
+		return new com.google.gson.GsonBuilder()
+			.setPrettyPrinting() // 들여쓰기 설정
+			.create()
+			.toJson(root);
+}
+
 
 	// TCP 클라이언트를 사용해 JSON 데이터 전송
 	public void sendDataToServer(String serverIp, int port) {
@@ -163,7 +168,8 @@ public class VirtualPLC {
 		VirtualPLC plc = new VirtualPLC();
 
 		// 서버 IP와 포트 설정
-		String serverIp = "192.168.1.151"; // 동일한 IP
+		String serverIp = "192.168.1.151"; // 아현 IP
+		String serverIp2 = "192.168.1.173"; // 창헌
 		int dbPort = 8081; // DB 저장용 포트
 		int wpfPort = 8080; // WPF 서버 포트
 
@@ -173,7 +179,7 @@ public class VirtualPLC {
 		});
 
 		Thread wpfThread = new Thread(() -> {
-			plc.sendDataToServer(serverIp, wpfPort); // WPF 서버로 JSON 데이터 전송
+			plc.sendDataToServer(serverIp2, wpfPort); // WPF 서버로 JSON 데이터 전송
 		});
 
 		// 데이터 전송 스레드 시작

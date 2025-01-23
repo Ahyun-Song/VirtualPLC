@@ -1,7 +1,6 @@
 package com.virtualplc;
 
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
@@ -101,23 +100,27 @@ public class VirtualPLC {
 			.toJson(root);
 }
 
-
-	// TCP 클라이언트를 사용해 JSON 데이터 전송
 	public void sendDataToServer(String serverIp, int port) {
 		while (true) {
 			try (Socket socket = new Socket(serverIp, port)) {
 				System.out.println("Connected to server: " + serverIp + ":" + port);
 
-				OutputStream output = socket.getOutputStream();
-				PrintWriter writer = new PrintWriter(output, true, StandardCharsets.UTF_8);
+				OutputStream outputStream = socket.getOutputStream();
 
 				while (true) { // 지속적으로 데이터 전송
 					String jsonData = generateFormattedJsonData();
+					byte[] jsonDataBytes = jsonData.getBytes(StandardCharsets.UTF_8);
+
+					// 메시지 길이 (4바이트)와 데이터 결합
+					byte[] lengthPrefix = java.nio.ByteBuffer.allocate(4).putInt(jsonDataBytes.length).array();
+
+					// 길이 정보와 실제 데이터를 전송
+					outputStream.write(lengthPrefix);
+					outputStream.write(jsonDataBytes);
+
 					System.out.println("Generated JSON Data:");
 					System.out.println(jsonData); // 콘솔에 JSON 데이터 출력
-
-					writer.println(jsonData); // JSON 데이터 전송
-					System.out.println("Sent JSON Data to server.");
+					System.out.println("Sent JSON Data to server with length prefix.");
 
 					Thread.sleep(1000); // 1초 대기
 				}
@@ -168,7 +171,7 @@ public class VirtualPLC {
 		VirtualPLC plc = new VirtualPLC();
 
 		// 서버 IP와 포트 설정
-		String serverIp = "192.168.1.151"; // 아현 IP
+		String serverIp = "192.168.0.130"; // 아현 IP
 		String serverIp2 = "192.168.1.173"; // 창헌
 		int dbPort = 8081; // DB 저장용 포트
 		int wpfPort = 8080; // WPF 서버 포트
